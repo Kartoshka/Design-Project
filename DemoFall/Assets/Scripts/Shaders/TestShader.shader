@@ -1,4 +1,6 @@
-﻿Shader "Unlit/TestShader"
+﻿// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
+
+Shader "Unlit/TestShader"
 {
 	Properties
 	{
@@ -8,6 +10,7 @@
 	SubShader
 	{
 		Tags { "RenderType"="Opaque" }
+        Tags{ "LightMode" = "ForwardBase" }
 		LOD 100
 
 		Pass
@@ -19,14 +22,8 @@
 			#pragma fragment frag
 			// make fog work
 			#pragma multi_compile_fog
-			
-			#include "UnityCG.cginc"
-            #include "UnityShaderVariables.cginc"
-            #include "UnityShaderUtilities.cginc"
             #include "UnityCG.cginc"
-            #include "Lighting.cginc"
-            #include "AutoLight.cginc"
-            #include "HLSLSupport.cginc"
+            #include "UnityLightingCommon.cginc" // for _LightColor0
 
 			struct appdata
 			{
@@ -45,9 +42,9 @@
                 float3 tSpace1 : TEXCOORD2;
                 float3 tSpace2 :TEXCOORD3;
                 float3 worldPos : TEXCOORD4;
-                UNITY_LIGHTING_COORDS(5,6)
+                float3 viewDir : TEXCOORD6;
             };
-
+           
 			sampler2D _MainTex;
 			float4 _MainTex_ST;
 			
@@ -65,14 +62,13 @@
                 float3 worldNormal = UnityObjectToWorldNormal(v.normal);
                 fixed3 worldTangent = UnityObjectToWorldDir(v.tangent.xyz);
                 fixed tangentSign = v.tangent.w * unity_WorldTransformParams.w;
-                fixed3 worldBinormal = cross(worldNormal, worldTangent) * tangentSign;
+                fixed3 worldBinormal = cross(worldNormal, worldTangent)* tangentSign;
                 
                 o.tSpace0 = worldTangent;//float3(worldTangent.x, worldBinormal.x, worldNormal.x);
                 o.tSpace1 = worldBinormal;//float3(worldTangent.y, worldBinormal.y, worldNormal.y);
                 o.tSpace2 = worldNormal;//float3(worldTangent.z, worldBinormal.z, worldNormal.z);
                 o.worldPos.xyz = worldPos;
-                o.normal = worldNormal;
-                UNITY_TRANSFER_LIGHTING(o,v.texcoord1.xy); // pass shadow and, possibly, light cookie coordinates to pixel shader
+                o.normal = v.normal;
 
                 return o;
 			}
@@ -80,15 +76,25 @@
 			fixed4 frag (v2f i) : SV_Target
 			{
                 fixed3 lightDir = _WorldSpaceLightPos0.xyz;
-                
-                fixed3 normal = UnpackNormal(tex2D(_NormalMap, i.uv));
-                float3 worldN;
-                worldN = normalize(worldN);
-                float3 transform  = lightDir;
-				// sample the texture
-				fixed4 col = float4(dot(i.tSpace0, transform),dot(i.tSpace1, transform),dot(i.tSpace2,transform),1.0);//tex2D(_MainTex, i.uv);
+                float3 viewDir = normalize(UnityWorldSpaceViewDir(i.worldPos));
 
-				return col;
+                fixed3 normal = UnpackNormal(tex2D(_NormalMap, i.uv));
+                
+                //normal = fixed3(dot(i.tSpace0, normal), dot(i.tSpace1, normal), dot(i.tSpace2, normal));
+                viewDir = float3(dot(i.tSpace0, viewDir),dot(i.tSpace1, viewDir),dot(i.tSpace2,viewDir));
+                lightDir = float3(dot(i.tSpace0, lightDir),dot(i.tSpace1, lightDir),dot(i.tSpace2,lightDir));
+
+                half3 h = normalize (lightDir + viewDir);
+
+                half diff = max (0, dot (normal, lightDir));
+
+                float nh = max (0, dot (normal, h));
+                float spec = pow (nh, 10);
+
+                half4 c;
+                c.rgb = (_LightColor0.rgb * spec);
+                c.a = 1.0f;
+                return c;
 			}
 			ENDCG
 		}
