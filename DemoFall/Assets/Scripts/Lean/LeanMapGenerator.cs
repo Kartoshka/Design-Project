@@ -26,8 +26,8 @@ public class LeanMapGenerator : MonoBehaviour {
         string textureName = Path.GetFileNameWithoutExtension(path);
         path = path.Substring(0, path.Length - Path.GetFileName(path).Length);
 
-        Texture2D lean1Tex = new Texture2D(width, height, NormalMap.format, true);
-        Texture2D lean2Tex = new Texture2D(width, height, NormalMap.format, true);
+        Texture2D lean1Tex = new Texture2D(width, height, TextureFormat.RGBA32, true);
+        Texture2D lean2Tex = new Texture2D(width, height, TextureFormat.RGBA32, true);
 
         Color[] pix = NormalMap.GetPixels();
         Color[] lean_1_colors = new Color[pix.Length];
@@ -43,6 +43,7 @@ public class LeanMapGenerator : MonoBehaviour {
                 Color lean2Write = lean_2_colors[x + y * width];
 
                 Vector3 normal = UnpackNormal(pixel);
+                Color packed24 = PackNormal(normal);
 
                 //B Map (Equation 3)
                 Vector2 B = new Vector2(normal.x, normal.y) / (normal.z * scale);
@@ -50,10 +51,9 @@ public class LeanMapGenerator : MonoBehaviour {
                 Vector3 M = new Vector3(B.x * B.x + (1.0f / s), B.y*B.y + (1.0f / s), B.x*B.y);
 
                 //Encode the normal in the first lean map at x y z
-                lean1Write.r = pixel.r;
-                lean1Write.g = pixel.g;
-                lean1Write.b = pixel.b;
-                lean1Write.a = 0.5f * M.z + 0.5f;
+                lean1Write.r = packed24.r;
+                lean1Write.g = packed24.g;
+                lean1Write.b = packed24.b;
 
                 lean2Write.r = 0.5f * B.x + 0.5f;
                 lean2Write.g = 0.5f * B.y + 0.5f;
@@ -72,16 +72,16 @@ public class LeanMapGenerator : MonoBehaviour {
         lean2Tex.Apply();
 
         // Encode texture into PNG
-        byte[] byes_lean1 = lean1Tex.EncodeToPNG();
-        byte[] byes_lean2 = lean2Tex.EncodeToPNG();
+        byte[] bytes_lean1 = lean1Tex.EncodeToPNG();
+        byte[] bytes_lean2 = lean2Tex.EncodeToPNG();
 
 
         Object.DestroyImmediate(lean1Tex);
         Object.DestroyImmediate(lean2Tex);
 
         // For testing purposes, also write to a file in the project folder
-        File.WriteAllBytes(path + textureName + "Lean1.png", byes_lean1);
-        File.WriteAllBytes(path + textureName + "Lean2.png", byes_lean2);
+        File.WriteAllBytes(path + textureName + "Lean1.png", bytes_lean1);
+        File.WriteAllBytes(path + textureName + "Lean2.png", bytes_lean2);
 
         Material m = GetComponent<Renderer>().sharedMaterial;
         lean1Tex = Resources.Load<Texture2D>("Textures/" + textureName + "Lean1");
@@ -99,9 +99,6 @@ public class LeanMapGenerator : MonoBehaviour {
         result.y = colorData.g * 2.0f - 1.0f;
         result.z = Mathf.Sqrt(1 - result.x * result.x - result.y * result.y);
 
-        result.x = result.x * 0.5f + 0.5f;
-        result.y = result.y * 0.5f + 0.5f;
-
         return result;
       }
 
@@ -109,12 +106,9 @@ public class LeanMapGenerator : MonoBehaviour {
     {
         Color result = new Color();
 
-        //result.x = colorData.a * 2.0f - 1.0f;
-        //result.y = colorData.g * 2.0f - 1.0f;
-        //result.z = Mathf.Sqrt(1 - result.x * result.x - result.y * result.y);
-
-        //result.x = result.x * 0.5f + 0.5f;
-        //result.y = result.y * 0.5f + 0.5f;
+        result.r = normal.x * 0.5f + 0.5f;
+        result.g = normal.y * 0.5f + 0.5f;
+        result.b = normal.z;
 
         return result;
     }

@@ -14,7 +14,12 @@
     CGPROGRAM
     #pragma surface surf LeanSpecular
     #pragma multi_compile  _AUTO_LOD_OFF _AUTO_LOD_ON
-
+    
+        
+    inline float3 unpackNormal(float3 n){
+        return float3(2 * n.xy - 1, n.z);
+    }
+    
     half4 LightingLeanSpecular (SurfaceOutput s, half3 lightDir, half3 viewDir, half atten) {
         half3 h = normalize (lightDir + viewDir);
 
@@ -49,8 +54,9 @@
     #else
         t1 = tex2D (_Lean1, IN.uv_Lean1.xy);
     #endif
-        o.Normal = float4(2 * t1.xy -1, t1.z, 1.0f);
+        o.Normal =unpackNormal(t1.xyz);//float4(2 * t1.xy -1, t1.z, 1.0f);
     }
+    
     ENDCG
     }
     
