@@ -26,8 +26,8 @@ public class LeanMapGenerator : MonoBehaviour {
         string textureName = Path.GetFileNameWithoutExtension(path);
         path = path.Substring(0, path.Length - Path.GetFileName(path).Length);
 
-        Texture2D lean1Tex = new Texture2D(width, height, TextureFormat.RGBA32, true);
-        Texture2D lean2Tex = new Texture2D(width, height, TextureFormat.RGBA32, true);
+        Texture2D lean1Tex = new Texture2D(width, height, TextureFormat.RGBAFloat, true);
+        Texture2D lean2Tex = new Texture2D(width, height, TextureFormat.RGBAFloat, true);
 
         Color[] pix = NormalMap.GetPixels();
         Color[] lean_1_colors = new Color[pix.Length];

@@ -1,4 +1,4 @@
-﻿Shader "Custom/LeanSpecular" {
+﻿Shader "Custom/Surface/LeanSpecular" {
     Properties {
       _MainTex ("Albedo", Color) = (0,0,0,0)
       _Lean1 ("Lean 1", 2D) = "bump" {}

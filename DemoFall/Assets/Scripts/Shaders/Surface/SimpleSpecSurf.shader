@@ -1,4 +1,4 @@
-﻿Shader "Custom/SpecularSimple" {
+﻿Shader "Custom/Surface/SimpleSpec" {
     Properties {
       _MainTex ("Albedo", Color) = (0,0,0,0)
       _BumpMap ("Bumpmap", 2D) = "bump" {}
