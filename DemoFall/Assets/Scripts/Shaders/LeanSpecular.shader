@@ -16,7 +16,7 @@
     CGPROGRAM
     #pragma surface surf LeanSpecular
     #pragma multi_compile  _AUTO_LOD_OFF _AUTO_LOD_ON
-        
+         
     inline float3 unpackNormal(float3 n){
         return float3(2 * n.xy - 1, n.z);
     }
@@ -25,6 +25,8 @@
         float2 uv_MainTex;
         float2 uv_Lean1;
         float2 uv_Lean2;
+        float3 worldPos;
+        float3 worldNormal;
     };
     
     struct Output{
@@ -38,7 +40,21 @@
         float2 B;
     };
     
+    float4 _MainTex;
+    sampler2D _Lean1;
+    sampler2D _Lean2;
+    
+    float _LOD;
+    float _SC;
+    
+    
     half4 LightingLeanSpecular (Output s, half3 lightDir, half3 viewDir, half atten) {
+        //float3 tbn = _unity_tbn_0.xyz;
+        
+        //lightDir = WorldToTangentNormalVector(lightDir);
+        //viewDir = WorldToTangentNormalVector(viewDir);
+        //s.Normal = WorldToTangentNormalVector(s.Normal);
+        
         half3 h = normalize (lightDir + viewDir);
         half diff = max (0, dot (s.Normal, lightDir));
         
@@ -50,28 +66,22 @@
         float2 pH = h.xy/h.z - s.B;
         float e = pH.x * pH.x * covMat.y + pH.y*pH.y*covMat.x - 2*pH.x*pH.y*covMat.z;
         
-        
+        //Calculate specular by Equation 1
         float nh = max (0, dot (s.Normal, h));
         float spec = 0;
         if(detCovMat > 0)
             spec = exp(-0.5 * e/detCovMat)/sqrt(detCovMat);//s.Specular; //pow (nh, 48.0);
 
         half4 c;
-        c.rgb = (s.Albedo * _LightColor0.rgb * diff + _LightColor0.rgb * spec) * atten;
+        c.rgb =  _LightColor0.rgb * spec * atten;
         c.a = s.Alpha;
         return c;
     }
     
-    float4 _MainTex;
-    sampler2D _Lean1;
-    sampler2D _Lean2;
-    
-    float _LOD;
-    float _SC;
-    
     void surf (Input IN, inout Output o) {
         o.Albedo = _MainTex; 
         
+        //Unpack Lean Maps
         float4 t1;
     #ifdef _AUTO_LOD_OFF
         t1 = tex2Dlod (_Lean1, float4(IN.uv_Lean1.xy,0, _LOD));
@@ -82,11 +92,20 @@
         
         float4 t2 =  tex2D(_Lean2, IN.uv_Lean2.xy);
         
+        //Build B and M matrix
         float2 B = (2*t2.xy-1) * _SC;
         float3 M =  float3( t2.zw, 2*t1.w - 1) * _SC * _SC;
         
         o.B = B;
         o.M = M;
+        
+        //float3 worldPos = IN.worldPos;
+        //float3 worldNormal = UnityObjectToWorldNormal(o.Normal);
+        //fixed3 worldTangent = UnityObjectToWorldDir(v.tangent.xyz);
+        //fixed tangentSign = v.tangent.w * unity_WorldTransformParams.w;
+        //fixed3 worldBinormal = cross(worldNormal, worldTangent) * tangentSign;
+                
+        //float3 test = IN.tSpace0.xyz;
     }
     
     ENDCG

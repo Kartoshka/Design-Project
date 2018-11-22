@@ -9,7 +9,7 @@ public class LeanMapGenerator : MonoBehaviour {
     public Texture2D NormalMap;
     public float Smoothness;
     public float scale = 1.0f;
-    public float s = 1.0f;
+    public float s = 256;
 
     private void Start()
     {
@@ -55,10 +55,11 @@ public class LeanMapGenerator : MonoBehaviour {
                 lean1Write.g = packed24.g;
                 lean1Write.b = packed24.b;
 
-                lean1Write.a = 0.5f * M.z + 0.5f;
-
                 lean2Write.r = 0.5f * B.x + 0.5f;
                 lean2Write.g = 0.5f * B.y + 0.5f;
+
+                //Encode M matrix partly in one map and partly in the other (lean
+                lean1Write.a = 0.5f * M.z + 0.5f;
                 lean2Write.b = M.x;
                 lean2Write.a = M.y;
 
