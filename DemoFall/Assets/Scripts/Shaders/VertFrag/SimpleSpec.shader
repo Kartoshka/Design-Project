@@ -96,7 +96,9 @@ Shader "Custom/Regular/SimpleSpecular"
 
                 float nh = max (0, dot (normal, h));
                 float spec = pow (nh, _Spec);
-
+                float tanNH = tan(nh);
+                //float specApprox = exp(-0.5 * _Spec * tanNH * tanNH);
+                
                 half4 c;
                 c.rgb = (_Albedo + _LightColor0.rgb * spec);
                 c.a = 1.0f;

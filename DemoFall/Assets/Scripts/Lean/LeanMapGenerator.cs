@@ -7,7 +7,6 @@ using UnityEditor;
 // Reference: https://www.csee.umbc.edu/~olano/papers/lean/lean.pdf
 public class LeanMapGenerator : MonoBehaviour {
     public Texture2D NormalMap;
-    public float Smoothness;
     public float scale = 1.0f;
     public float s = 256;
 
@@ -49,6 +48,9 @@ public class LeanMapGenerator : MonoBehaviour {
                 Vector2 B = new Vector2(normal.x, normal.y) / (normal.z * scale);
                 //M Map (Equation 6)
                 Vector3 M = new Vector3(B.x * B.x + (1.0f / s), B.y*B.y + (1.0f / s), B.x*B.y);
+
+                if (Mathf.Abs(B.x) > 1 || Mathf.Abs(B.y) > 1)
+                    Debug.Log("X: " + B.x + " Y: " + B.y);
 
                 //Encode the normal in the first lean map at x y z
                 lean1Write.r = packed24.r;

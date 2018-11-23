@@ -10,6 +10,7 @@ Shader "Custom/Regular/LeanSpec"
         _LOD("Level of Detail", Float) = 0
         _SC("Scale",Float) = 1
         _Spec("Specular Exponent", Float) = 48
+        _Correction("Correction Factor", Float) = 1
         [MaterialToggle] _AUTO_LOD("Automatic LOD", Float) = 0
 	}
 	SubShader
@@ -44,7 +45,7 @@ Shader "Custom/Regular/LeanSpec"
 
 			struct v2f
 			{
-				float2 uv : TEXCOORD0;
+				float2   uv : TEXCOORD0;
 				float4 pos : SV_POSITION;
                 
                 float3 tSpace0 : TEXCOORD1;
@@ -65,6 +66,7 @@ Shader "Custom/Regular/LeanSpec"
             float _LOD;
             float _Spec;
             float _SC;
+            float _Correction;
             
 			v2f vert (appdata v)
 			{
@@ -75,7 +77,7 @@ Shader "Custom/Regular/LeanSpec"
                 
                 float3 worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
                
-               float3 worldNormal = UnityObjectToWorldNormal(v.normal);
+                float3 worldNormal = UnityObjectToWorldNormal(v.normal);
                 fixed3 worldTangent = UnityObjectToWorldDir(v.tangent.xyz);
                 fixed tangentSign = v.tangent.w * unity_WorldTransformParams.w;
                 fixed3 worldBinormal = cross(worldNormal, worldTangent)* tangentSign;
@@ -94,28 +96,43 @@ Shader "Custom/Regular/LeanSpec"
                 float3 viewDir = normalize(UnityWorldSpaceViewDir(i.worldPos));
                 
                 // Unpack Lean Maps
-                float4 t1;
+                
             #ifdef _AUTO_LOD_OFF
-                t1 = tex2Dlod (_Lean1, float4(i.uv,0, _LOD));
+                float4 t1 = tex2Dlod (_Lean1, float4(i.uv,0, _LOD));
+                float4 t2 = tex2Dlod (_Lean2, float4(i.uv,0, _LOD));
             #else
-                t1 = tex2D (_Lean1, i.uv.xy);
+                float4 t1 = tex2D (_Lean1, i.uv.xy);
+                float4 t2 = tex2D (_Lean2, i.uv.xy);
             #endif
                 float3 normal = UnpackLeanNormal(t1.xyz);
                 
+                //Build B and M matrix
+                float2 B = (2*t2.xy-1) * _SC;
+                float3 M =  float3( t2.zw, 2*t1.w - 1) * _SC * _SC;
+                
                 //normal = fixed3(dot(i.tSpace0, normal), dot(i.tSpace1, normal), dot(i.tSpace2, normal));
-                viewDir = float3(dot(i.tSpace0, viewDir),dot(i.tSpace1, viewDir),dot(i.tSpace2,viewDir));
-                lightDir = float3(dot(i.tSpace0, lightDir),dot(i.tSpace1, lightDir),dot(i.tSpace2,lightDir));
-
+                viewDir = float3(dot(i.tSpace0, viewDir), dot(i.tSpace1, viewDir), dot(i.tSpace2,viewDir));
+                lightDir = float3(dot(i.tSpace0, lightDir), dot(i.tSpace1, lightDir), dot(i.tSpace2,lightDir));
+                
+                
                 half3 h = normalize (lightDir + viewDir);
-
-                half diff = max (0, dot (normal, lightDir));
-
-                float nh = max (0, dot (normal, h));
-                float spec = pow (nh, _Spec);
-
+                    
+                //Convert M to sigma by Equation 5
+                float3 covMat =  M - float3(B.x * B.x, B.y * B.y, B.x * B.y);
+                float det = covMat.x * covMat.y - covMat.z * covMat.z;
+                
+                //Calculate projection of halfVector onto the z = 1 plane, and shift
+                float2 pH = h.xy/h.z - B;
+                float e = pH.x * pH.x * covMat.y + pH.y*pH.y*covMat.x - 2*pH.x*pH.y*covMat.z;
+        
+                float spec = 0;
+                if(det > 0)
+                    spec = exp(-0.5 * e/det)/(sqrt(det) * UNITY_TWO_PI) * _Correction /* (4 * dot(viewDir, h) * dot(normal, viewDir))*/;
+                 
                 half4 c;
                 c.rgb = (_Albedo + _LightColor0.rgb * spec);
                 c.a = 1.0f;
+                
                 return c;
 			}
 			ENDCG
