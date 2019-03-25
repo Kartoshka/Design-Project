@@ -8,7 +8,6 @@ Shader "Custom/Regular/LeanSpec"
         _Lean1 ("Lean 1", 2D) = "bump" {}
         _Lean2 ("Lean 2", 2D) = "bump" {}
         _LOD("Level of Detail", Float) = 0
-        _SC("Scale",Float) = 1
         _Spec("Specular Exponent", Float) = 48
         _Correction("Correction Factor", Float) = 1
         [MaterialToggle] _AUTO_LOD("Automatic LOD", Float) = 0
@@ -22,8 +21,7 @@ Shader "Custom/Regular/LeanSpec"
 		Pass
 		{
 			CGPROGRAM
-// Upgrade NOTE: excluded shader from DX11; has structs without semantics (struct v2f members tSpace0,tSpace1,tSpace2)
-            #pragma exclude_renderers d3d11
+
 			#pragma vertex vert
 			#pragma fragment frag
             #pragma multi_compile  _AUTO_LOD_OFF _AUTO_LOD_ON
@@ -65,7 +63,6 @@ Shader "Custom/Regular/LeanSpec"
             
             float _LOD;
             float _Spec;
-            float _SC;
             float _Correction;
             
 			v2f vert (appdata v)
@@ -107,8 +104,8 @@ Shader "Custom/Regular/LeanSpec"
                 float3 normal = UnpackLeanNormal(t1.xyz);
                 
                 //Build B and M matrix
-                float2 B = (2*t2.xy-1) * _SC;
-                float3 M =  float3( t2.zw, 2*t1.w - 1) * _SC * _SC;
+                float2 B = (2*t2.xy-1);
+                float3 M =  float3( t2.zw, 2*t1.w - 1);
                 
                 //normal = fixed3(dot(i.tSpace0, normal), dot(i.tSpace1, normal), dot(i.tSpace2, normal));
                 viewDir = float3(dot(i.tSpace0, viewDir), dot(i.tSpace1, viewDir), dot(i.tSpace2,viewDir));
@@ -119,6 +116,7 @@ Shader "Custom/Regular/LeanSpec"
                     
                 //Convert M to sigma by Equation 5
                 float3 covMat =  M - float3(B.x * B.x, B.y * B.y, B.x * B.y);
+				covMat.xy += 1.0f / _Spec;
                 float det = covMat.x * covMat.y - covMat.z * covMat.z;
                 
                 //Calculate projection of halfVector onto the z = 1 plane, and shift

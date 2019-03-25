@@ -5,7 +5,7 @@ Shader "Custom/Regular/SimpleSpecular"
 	Properties
 	{
         _Albedo ("Albedo", Color) = (0,0,0,0)
-        _NormalMap ("Normal Map", 2D) = "bump" {}
+        _NormalMap ("Normal Map", 2D) = "white" {}
         _LOD("Level of Detail", Float) = 0
         _Spec("Specular Exponent", Float) = 48
         [MaterialToggle] _AUTO_LOD("Automatic LOD", Float) = 0
@@ -19,8 +19,7 @@ Shader "Custom/Regular/SimpleSpecular"
 		Pass
 		{
 			CGPROGRAM
-// Upgrade NOTE: excluded shader from DX11; has structs without semantics (struct v2f members tSpace0,tSpace1,tSpace2)
-            #pragma exclude_renderers d3d11
+
 			#pragma vertex vert
 			#pragma fragment frag
             #pragma multi_compile  _AUTO_LOD_OFF _AUTO_LOD_ON
@@ -58,6 +57,7 @@ Shader "Custom/Regular/SimpleSpecular"
 				v2f o;
 				o.pos = UnityObjectToClipPos(v.vertex);
 				o.uv = TRANSFORM_TEX(v.uv, _NormalMap);
+
 				UNITY_TRANSFER_FOG(o,o.vertex);
                 
                 float3 worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
@@ -66,9 +66,10 @@ Shader "Custom/Regular/SimpleSpecular"
                 fixed tangentSign = v.tangent.w * unity_WorldTransformParams.w;
                 fixed3 worldBinormal = cross(worldNormal, worldTangent)* tangentSign;
                 
-                o.tSpace0 = worldTangent;//float3(worldTangent.x, worldBinormal.x, worldNormal.x);
-                o.tSpace1 = worldBinormal;//float3(worldTangent.y, worldBinormal.y, worldNormal.y);
-                o.tSpace2 = worldNormal;//float3(worldTangent.z, worldBinormal.z, worldNormal.z);
+                o.tSpace0 = worldTangent;
+                o.tSpace1 = worldBinormal;
+                o.tSpace2 = worldNormal;
+
                 o.worldPos.xyz = worldPos;
                 o.normal = v.normal;
 
@@ -96,11 +97,10 @@ Shader "Custom/Regular/SimpleSpecular"
 
                 float nh = max (0, dot (normal, h));
                 float spec = pow (nh, _Spec);
-                float tanNH = tan(nh);
-                //float specApprox = exp(-0.5 * _Spec * tanNH * tanNH);
+				float norm = _Spec / (UNITY_TWO_PI);
                 
                 half4 c;
-                c.rgb = (_Albedo + _LightColor0.rgb * spec);
+				c.rgb = (_Albedo + _LightColor0.rgb * spec * norm);
                 c.a = 1.0f;
                 return c;
 			}
