@@ -27,10 +27,6 @@
 
 		_Cutoff ("Alpha Cutoff", Range(0, 1)) = 0.5
 
-		_WireframeColor ("Wireframe Color", Color) = (0, 0, 0)
-		_WireframeSmoothing ("Wireframe Smoothing", Range(0, 10)) = 1
-		_WireframeThickness ("Wireframe Thickness", Range(0, 10)) = 1
-
 		_TessellationUniform ("Tessellation Uniform", Range(1, 64)) = 1
 		_TessellationEdgeLength ("Tessellation Edge Length", Range(5, 100)) = 50
 
@@ -82,11 +78,10 @@
 			#pragma fragment MyFragmentProgram
 			#pragma hull MyHullProgram
 			#pragma domain MyDomainProgram
-			#pragma geometry MyGeometryProgram
 
 			#define FORWARD_BASE_PASS
 
-			#include "MyFlatWireframe.cginc"
+			#include "My Lighting.cginc"
 			#include "MyTessellation.cginc"
 
 			ENDCG
@@ -123,9 +118,8 @@
 			#pragma fragment MyFragmentProgram
 			#pragma hull MyHullProgram
 			#pragma domain MyDomainProgram
-			#pragma geometry MyGeometryProgram
 
-			#include "MyFlatWireframe.cginc"
+			#include "My Lighting.cginc"
 			#include "MyTessellation.cginc"
 
 			ENDCG
@@ -161,11 +155,10 @@
 			#pragma fragment MyFragmentProgram
 			#pragma hull MyHullProgram
 			#pragma domain MyDomainProgram
-			#pragma geometry MyGeometryProgram
 
 			#define DEFERRED_PASS
 
-			#include "MyFlatWireframe.cginc"
+			#include "My Lighting.cginc"
 			#include "MyTessellation.cginc"
 
 			ENDCG
