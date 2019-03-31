@@ -13,14 +13,13 @@ public class LeanMapGenerator : MonoBehaviour {
         Debug.Log(NormalMap.format.ToString());
     }
 
-    public void GenerateAndSetLeanMap()
+    public static void NormalMapToLeanMaps(Texture2D NormalMap, string textureName)
     {
         // Create a texture the size of the screen, RGB24 format
         int width = NormalMap.width;
         int height = NormalMap.height;
 
         string path = AssetDatabase.GetAssetPath(NormalMap);
-        string textureName = Path.GetFileNameWithoutExtension(path);
         path = path.Substring(0, path.Length - Path.GetFileName(path).Length);
         
         Texture2D lean1Tex = new Texture2D(width, height, TextureFormat.RGBAHalf, false);
@@ -54,7 +53,7 @@ public class LeanMapGenerator : MonoBehaviour {
                 lean2Write.r = 0.5f * B.x + 0.5f;
                 lean2Write.g = 0.5f * B.y + 0.5f;
 
-                //Encode M matrix partly in one map and partly in the other (lean
+                //Encode M matrix partly in one map and partly in the other 
                 lean1Write.a = 0.5f * M.z + 0.5f;
                 lean2Write.b = M.x;
                 lean2Write.a = M.y;
@@ -70,7 +69,7 @@ public class LeanMapGenerator : MonoBehaviour {
         lean2Tex.SetPixels(lean_2_colors);
         lean2Tex.Apply();
 
-        // Encode texture into PNG
+        // Encode texture into EXR
         byte[] bytes_lean1 = lean1Tex.EncodeToEXR();
         byte[] bytes_lean2 = lean2Tex.EncodeToEXR();
 
@@ -79,15 +78,8 @@ public class LeanMapGenerator : MonoBehaviour {
         Object.DestroyImmediate(lean2Tex);
 
         // For testing purposes, also write to a file in the project folder
-        File.WriteAllBytes(path + textureName + "Lean1.exr", bytes_lean1);
-        File.WriteAllBytes(path + textureName + "Lean2.exr", bytes_lean2);
-
-        Material m = GetComponent<Renderer>().sharedMaterial;
-        lean1Tex = Resources.Load<Texture2D>("Textures/" + textureName + "Lean1");
-        lean2Tex = Resources.Load<Texture2D>("Textures/" + textureName + "Lean2");
-        m.SetTexture("_Lean1", lean1Tex);
-        m.SetTexture("_Lean2", lean2Tex);
-
+        File.WriteAllBytes(path + textureName + "_L1.exr", bytes_lean1);
+        File.WriteAllBytes(path + textureName + "_L2.exr", bytes_lean2);
     }
 
     private static Vector3 UnpackNormal(Color colorData){
