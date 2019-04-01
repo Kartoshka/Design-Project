@@ -132,7 +132,6 @@ Shader "Custom/LEAN"
 				float norm = _Spec / (UNITY_TWO_PI);
 				spec = pow(nh, _Spec) * norm;
 			#endif
-
                  
                 half4 c;
                 c.rgb = (_Albedo*_LightColor0.rgb* saturate(dot(lightDir, normal)) + _LightColor0.rgb * spec);
