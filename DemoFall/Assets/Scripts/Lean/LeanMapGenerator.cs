@@ -13,13 +13,13 @@ public class LeanMapGenerator : MonoBehaviour {
         Debug.Log(NormalMap.format.ToString());
     }
 
-    public static void NormalMapToLeanMaps(Texture2D NormalMap, string textureName)
+    public static Texture2D[] NormalMapToLeanMaps(Texture2D NormalMap, string textureName, string optionalPath = "")
     {
         // Create a texture the size of the screen, RGB24 format
         int width = NormalMap.width;
         int height = NormalMap.height;
 
-        string path = AssetDatabase.GetAssetPath(NormalMap);
+        string path = optionalPath.Length != 0 ? optionalPath : AssetDatabase.GetAssetPath(NormalMap);
         path = path.Substring(0, path.Length - Path.GetFileName(path).Length);
         
         Texture2D lean1Tex = new Texture2D(width, height, TextureFormat.RGBAHalf, false);
@@ -80,6 +80,34 @@ public class LeanMapGenerator : MonoBehaviour {
         // For testing purposes, also write to a file in the project folder
         File.WriteAllBytes(path + textureName + "_L1.exr", bytes_lean1);
         File.WriteAllBytes(path + textureName + "_L2.exr", bytes_lean2);
+        AssetDatabase.Refresh();
+
+        TextureImporter L1Import = AssetImporter.GetAtPath(path + textureName + "_L1.exr") as TextureImporter;
+
+        L1Import.sRGBTexture = false;
+        L1Import.textureCompression = TextureImporterCompression.Uncompressed;
+        L1Import.alphaIsTransparency = false;
+        L1Import.isReadable = true;
+        L1Import.filterMode = FilterMode.Bilinear;
+        L1Import.textureFormat = TextureImporterFormat.RGBAHalf;
+
+        L1Import.SaveAndReimport();
+
+        TextureImporter L2Import = AssetImporter.GetAtPath(path + textureName + "_L2.exr") as TextureImporter;
+
+        L2Import.sRGBTexture = false;
+        L2Import.textureCompression = TextureImporterCompression.Uncompressed;
+        L2Import.alphaIsTransparency = false;
+        L2Import.isReadable = true;
+        L2Import.filterMode = FilterMode.Bilinear;
+        L2Import.textureFormat = TextureImporterFormat.RGBAHalf;
+
+        L2Import.SaveAndReimport();
+
+        Texture2D[] result = new Texture2D[2];
+        result[0] = (Texture2D)AssetDatabase.LoadAssetAtPath(path + textureName + "_L1.exr", typeof(Texture2D));
+        result[1] = (Texture2D)AssetDatabase.LoadAssetAtPath(path + textureName + "_L2.exr", typeof(Texture2D));
+        return result;
     }
 
     private static Vector3 UnpackNormal(Color colorData){
