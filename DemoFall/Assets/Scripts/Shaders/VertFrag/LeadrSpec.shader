@@ -1,6 +1,6 @@
 // Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
 
-Shader "Custom/Regular/LeadrSpec2"
+Shader "Custom/Regular/LeadrSpec"
 {
 	Properties
 	{
@@ -8,10 +8,10 @@ Shader "Custom/Regular/LeadrSpec2"
         _Lean1 ("Lean 1", 2D) = "bump" {}
         _Lean2 ("Lean 2", 2D) = "bump" {}
         _LOD("Level of Detail", Float) = 0
-        _SC("Scale",Float) = 1
         _Spec("Specular Exponent", Float) = 48
         _Correction("Correction Factor", Float) = 1
-        _Radiance("Radiance", Float) = 1
+        _Refractive("Refractive Index", Float) = 0
+        _Radiance ("Radiance", Float) = 1
         [MaterialToggle] _AUTO_LOD("Automatic LOD", Float) = 0
 	}
 	SubShader
@@ -23,8 +23,7 @@ Shader "Custom/Regular/LeadrSpec2"
 		Pass
 		{
 			CGPROGRAM
-// Upgrade NOTE: excluded shader from DX11; has structs without semantics (struct v2f members tSpace0,tSpace1,tSpace2)
-            #pragma exclude_renderers d3d11
+
 			#pragma vertex vert
 			#pragma fragment frag
             #pragma multi_compile  _AUTO_LOD_OFF _AUTO_LOD_ON
@@ -36,8 +35,9 @@ Shader "Custom/Regular/LeadrSpec2"
                 return float3(2 * n.xy - 1, n.z);
             }
 
-   			inline float LambdaMaskingShadowing(float3 w, float2 B, float3 covMat){
-   				// Angles
+            // Masking and shadowing term
+            inline float Lambda(float3 w, float2 B, float3 covMat){
+                // Angles
                 float theta = acos(w.z);
                 float phi = acos(w.x/sin(theta));
                 // Eq 14
@@ -51,14 +51,19 @@ Shader "Custom/Regular/LeadrSpec2"
                 if (v > 1.6)
                     return (1 - 1.259 * v + 0.396 * v * v) / (3.535 * v + 2.181 * v * v);
                 return 0;
-   			}
-			
-			//schlick functions
-			float SchlickFresnel(float LdotH){
-			    float x = clamp(1.0-LdotH, 0.0, 1.0);
-			    float x2 = x*x;
-			    return x2*x2*x;
-			}
+            }
+
+            //schlick functions
+            float SchlickFresnel(float LdotH){
+                float x = clamp(1.0-LdotH, 0.0, 1.0);
+                float x2 = x*x;
+                return x2*x2*x;
+            }
+
+            float SchlickIORFresnelFunction(float ior,float LdotH){
+                float f0 = pow((ior-1)/(ior+1),2);
+                return f0 +  (1 - f0) * SchlickFresnel(LdotH);
+            }
 
 			struct appdata
 			{
@@ -90,8 +95,10 @@ Shader "Custom/Regular/LeadrSpec2"
             
             float _LOD;
             float _Spec;
-            float _SC;
             float _Correction;
+            float _Refractive;
+            float _Radiance;
+
             
 			v2f vert (appdata v)
 			{
@@ -132,8 +139,8 @@ Shader "Custom/Regular/LeadrSpec2"
                 float3 normal = UnpackLeanNormal(t1.xyz);
                 
                 //Build B and M matrix
-                float2 B = (2*t2.xy-1) * _SC;
-                float3 M =  float3( t2.zw, 2*t1.w - 1) * _SC * _SC;
+                float2 B = (2*t2.xy-1);
+                float3 M =  float3( t2.zw, 2*t1.w - 1);
                 
                 //normal = fixed3(dot(i.tSpace0, normal), dot(i.tSpace1, normal), dot(i.tSpace2, normal));
                 viewDir = float3(dot(i.tSpace0, viewDir), dot(i.tSpace1, viewDir), dot(i.tSpace2,viewDir));
@@ -144,6 +151,7 @@ Shader "Custom/Regular/LeadrSpec2"
                     
                 //Convert M to sigma by Equation 5
                 float3 covMat =  M - float3(B.x * B.x, B.y * B.y, B.x * B.y);
+				covMat.xy += 1.0f / _Spec;
                 float det = covMat.x * covMat.y - covMat.z * covMat.z;
                 
                 //Calculate projection of halfVector onto the z = 1 plane, and shift
@@ -157,14 +165,22 @@ Shader "Custom/Regular/LeadrSpec2"
                 // Calculate normal distribution function D following anisotropic Beckmann formulation  
                 // Eq (10)
                 float D = P22/pow(dot(h, normal),4);
-				
-				// Microfacet theory, micronormals average to mesonormal 
+                
+                // Microfacet theory, micronormals average to mesonormal 
                 // Eq (11)
-                float3 mesonormal = (-B.xy, 1) /sqrt(1 + B.x * B.x + B.y * B.y);
+                float3 mesonormal = (-B.x, -B.y, 1) / sqrt(1 + B.x * B.x + B.y * B.y);
+                
+                // Use Shlick approximation for Fresnel term
+                float F = SchlickIORFresnelFunction(_Refractive, dot(lightDir, h));
 
-                // Masking shadowing moment
+                // Specular surface shading formulation for LEADR
+                // Eq (17)
+                // mesonormal = normalize(mesonormal);
+                // float spec = (dot(mesonormal, normal) * _Radiance * F * D)/(4 * (1 + Lambda(viewDir, B, covMat) + Lambda(lightDir, B, covMat)));
+                float spec = (dot(mesonormal, normal) * _Radiance * F * D)/(dot(mesonormal, viewDir) * 4 * (1 + Lambda(viewDir, B, covMat) + Lambda(lightDir, B, covMat)));
+
                 half4 c;
-                c.rgb = (_Albedo + _LightColor0.rgb * P22);
+                c.rgb = (_Albedo + _LightColor0.rgb * spec);
                 c.a = 1.0f;
                 
                 return c;
