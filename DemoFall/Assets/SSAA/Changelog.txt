@@ -1,0 +1,162 @@
+  1.8.2 (Patch 2)
+ --------------
+ - [SRP] Fixed a bug that was causing SSAA to not compile on LWRP pipeline
+ - [SRP] Fixed a bug that was causing the downsampling filters to not change at runtime
+ - [SRP] Shader fixes
+
+
+ 1.8.1 (Patch 1)
+ --------------
+ - Fixed an error occuring while using SSAA in unity 2018.3 and up prefabs.
+ - [SRP] Fixed a bug that was causing SSAA to add a new collider every time SSAA was enabled
+ - [SRP] Fixed a bug that was causing filtering modes not to work correctly when FSSAA was enabled
+ - [SRP] Fixed a bug that was sometimes causing the internal camera to not initialize correctly
+
+ 1.8.0
+ --------------
+ - Added support for overlapping cameras
+ - Fixed a bug that was causing errors after unity was started
+ - Fixed a bug causing VR script to not compile in unity < 2017
+
+ - [SRP] Added support for overlapping cameras
+ - [SRP] Added directive check for SSAA_HDRP for ease of installation
+ - [SRP] Fixed a bug causing flipping in some HDRP scenes (requires SRP 4.5+)
+ - [SRP] OLD SRP VERSIONS ARE NOT SUPPORTED ANYMORE. REQUIRES 4.5+
+ --------------
+ Known issues: 
+ - Post processing stack - depth of field effect affects the alpha channel of the image buffer 
+   (affects overlapping - under investigation)
+
+--------------
+OLDER VERSIONS
+--------------
+
+1.7.2 (Patch 2)
+--------------
+
+ - Fixed a bug that was causing SSAA_VR to require post processing stack script attatched in non SRP environment.
+ - Fixed a bug that was causing SSAA_VR to not apply to the device.
+ - Fixed a bug with SSAA Ultra on SSAA_VR.
+ - Fixed a bug that was causing SSAA to get stuck in no filtering mode.
+ - Fixed minor bug in public API.
+ - Fixed minor bug in utils script that was sometimes causing building to fail.
+
+ - [SRP] Optimized for new SRP versions on 2018.3 (SRP 4.5.0+) 
+ - [SRP] Optimized for new SRP versions on 2019.1 (SRP 5.0.0+) 
+ - [SRP] Fixed a bug that was causing SSAA to have the wrong filtering mode.
+ - [SRP] Fixed a bug that was causing SSAA to run incorrectly in build.
+
+
+1.7.1 (Patch 1)
+--------------
+
+ - Fixed an issue that was causing white screens when unity was recompiling shaders.
+ - Shader cleanup.
+
+1.7.0
+--------------
+
+ - Redesigned SSAA_InternalRenderer script
+ - Deprecated MadGoatSSAA_Adv script. Regular MadGoatSSAA now includes the functionality of MadGoatSSAA_Adv
+ - Added command buffer post processing implementation on Standard Pipeline
+ - Added beta support for HDRP and LWRP (with extensibility to future/custom SRPs)
+ - Fixed minor bug that was causing SSAA to sometime throw a blackscreen when going from game to editor mode
+ - Fixed minor bug causing the filtering to not always work in SSAA_VR mode
+ - Fixed minor bug in VR causing SSAA buffer RenderTextures to have wrong size
+ - Fixed minor issues in screenshot API
+ - Fixed minor issues in SSAA script
+ - Improved performance (lower CPU usage from behaviour code)
+ - Improved inspector
+ 
+
+1.6.1 (Patch 1)
+--------------
+
+ - Fixed Adaptive Resolution mode in VR (Oopsie doopsie)
+
+1.6.0
+--------------
+
+ - Added Per Axis supersampling mode that allows changing the multiplier for each axis of the screen independently
+ - Added checks for invalid multiplier values in API methods
+ - Fixed an issue with the UI allowing for zero and negative multiplier values on custom mode
+ - Fixed missing FSSAA intensity set method in global api
+ - Inspector code clean up (for better extensibility in the future)
+ - Removed ancient code left overs from utils :)
+
+1.5.1
+--------------
+
+ - Fixed a bug that caused image glitching in SSAA VR single pass mode.
+
+1.5
+--------------
+
+ - Tweaked for Unity 2018.1
+ - Bug fixes in public API methods
+ - Package size optimization
+
+1.4
+--------------
+
+ - Added MadGoatSSAA_VR script dedicated for VR devices
+ - Added option to select screenshot/panorama save file format
+ - 360 panorama screenshot mode is now out of "alpha" state
+ - Added easier to read color theme for the inspector when using unity pro (not tested)
+ - Updated all the shaders to support singlepass stereoscopic rendering
+ - Fixed major bug causing MadGoatSSAA_Adv to throw errors and cause black screens
+ - Fixed 360 panorama color issue when using supersampling
+ - Fixed a bug causing Panorama settings to reset when taking 360 pictures from editor
+ - Added button to open online documentation in General Tab
+
+1.3
+--------------
+ 
+ - Added MadGoatSSAA_Adv script dedicated for offline rendering and other similar workflows
+ - Added compatibility with MadGoat Debugger & Benchmark
+ - Added option to change the internal image format (under General tab)
+ - Added slider to control FSSAA intensity
+ - Fixed a bug that was causing FSSAA to corrupt alpha channel when using offline render systems
+ - Improved Nearest Neighbor image filter
+ - Fixed a bug inside the ScreenPointToRay method
+ - Fixed a bug causing "usefilter" in screenshots to automatically turn on when taking screenshots from editor
+ - Performance improvements to the demo scene
+ - Minor UI fixes
+ - Minor code improvements
+
+1.2
+--------------
+
+ - Fixed Screenshot Settings not saving when deselecting game object
+ - Fixed HDR support
+ - Fixed bug causing incompatibility with Post-Processing Stack
+ - Better implementation of screenshot code.
+ - Added "Ultra Quality (FSSAA)" mode to super sampling *
+ - Added functionality to render supersampled panoramas (alpha) **
+ - Added Adaptive Resolution Mode ***
+ - Added global functions to control parameters of all the MadGoatSSAA instances in scene.
+ - Added support for rendering to target render texture
+
+*  FSSAA is inspired from the Filtering Approaces for Real-Time Anti-Aliasing slides by 
+   Timothy Lottes (NVIDIA) and uses FXAA v3 to filter the render image before resizing  
+   to screen resolution.
+
+** Currently, Panorama Screenshots have color issues when supersampling (multiplier different than 1). 
+   However it doesn't affect the operation of the other functionality of the asset and has been
+   released as an "alpha" feature.
+
+***Adaptshitive resolution mode works by keeping track of the framerate and adjusting the 
+   render resolution in order to maximize the performance.
+
+1.1
+--------------
+- Fixed terrain being missing in demo scene
+- Fixed screenshot stretching when screenshot aspect ratio was different from screen aspect ratio
+- Fixed viewport resizing causing to break the image aspect ratio
+- Added own implementation of ScreenPointToRay to fix raycasting offset at image resolutions different than screen resolution
+- Added OnClick() compatibility mode (at cost of lower overall performance)
+- Minor changes to the Editor UI
+
+1.0
+--------------
+- Initial release
