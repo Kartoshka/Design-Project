@@ -46,7 +46,7 @@ Shader "Custom/LEADR"
                                  2 * cos(phi) * sin(phi) * covMat.z;
                 // extend to Gaussian with approximation Walter et al. (2007)
                 float v = (w.z/sin(theta) - mu)/(sqrt(sigma_sq * 2));
-                if (v > 1.6)
+                if (v < 1.6)
                     return (1 - 1.259 * v + 0.396 * v * v) / (3.535 * v + 2.181 * v * v);
                 return 0;
             }
@@ -172,7 +172,7 @@ Shader "Custom/LEADR"
 
                 // Specular surface shading formulation for LEADR
                 // Eq (17)
-                float spec = (mesonormal.z/dot(mesonormal, viewDir))* (_LightColor0.rgb * F * D) / (4 * (1 + Lambda(viewDir, B, covMat) + Lambda(lightDir, B, covMat)));
+				float spec = covMat.z;//(mesonormal.z/dot(mesonormal, viewDir))* (_LightColor0.rgb * F * D) / (4 * (1 + Lambda(viewDir, B, covMat) + Lambda(lightDir, B, covMat)));
 
                 half4 c;
                 c.rgb = (_Albedo * _LightColor0.rgb * saturate(dot(lightDir, normal)) + spec);

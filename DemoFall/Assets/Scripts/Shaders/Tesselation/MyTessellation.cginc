@@ -13,10 +13,21 @@ struct TessellationControlPoint {
 	float2 uv2 : TEXCOORD2;
 };
 
+struct TesselationControlLEADR {
+	float4 vertex : INTERNALTESSPOS;
+	float3 normal : NORMAL;
+	float4 tangent : TANGENT;
+	float4 binormal : BINORMAL;
+	float2 uv : TEXCOORD0;
+	float2 uv1 : TEXCOORD1;
+	float2 uv2 : TEXCOORD2;
+};
+
 struct TessellationFactors {
     float edge[3] : SV_TessFactor;
     float inside : SV_InsideTessFactor;
 };
+
 
 TessellationControlPoint MyTessellationVertexProgram (VertexData v) {
 	TessellationControlPoint p;
