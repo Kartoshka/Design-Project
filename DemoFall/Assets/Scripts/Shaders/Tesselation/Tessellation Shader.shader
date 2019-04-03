@@ -11,7 +11,7 @@
 		[Gamma] _Metallic ("Metallic", Range(0, 1)) = 0
 		_Smoothness ("Smoothness", Range(0, 1)) = 0.1
 
-		[NoScaleOffset] _DisplacementMap ("Displacement Map", 2D) = "black" {}
+		[NoScaleOffset] _ParallaxMap ("Displacement Map", 2D) = "black" {}
 		_ParallaxStrength ("Displacement Strength", Range(0, 1)) = 0
 
 		[NoScaleOffset] _OcclusionMap ("Occlusion", 2D) = "white" {}

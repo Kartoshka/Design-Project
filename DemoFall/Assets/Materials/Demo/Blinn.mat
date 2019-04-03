@@ -6,8 +6,8 @@ Material:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: LEADR
-  m_Shader: {fileID: 4800000, guid: defd14b303fea7f4db8393f226a4b249, type: 3}
+  m_Name: Blinn
+  m_Shader: {fileID: 4800000, guid: 27ac3c063b466413d92def69311051b2, type: 3}
   m_ShaderKeywords: _AUTO_LOD_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -38,20 +38,16 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _Lean1:
-        m_Texture: {fileID: 2800000, guid: b0d5dc250ed6eff4e8263b5f9a1d141c, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _Lean2:
-        m_Texture: {fileID: 2800000, guid: 6fe2670f2b139c2499adae9dfa80ccf1, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
     - _MainTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
         m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NormalMap:
+        m_Texture: {fileID: 2800000, guid: 7d76bd8dc6bef2b43b331b2a34d90dd6, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
@@ -76,15 +72,13 @@ Material:
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _Radiance: 1
-    - _Rough: 0.4
     - _SmoothnessTextureChannel: 0
-    - _Spec: 0.5
+    - _Spec: 128
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:
-    - _Albedo: {r: 0, g: 0, b: 0, a: 0}
+    - _Albedo: {r: 0, g: 1, b: 0.99999976, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
