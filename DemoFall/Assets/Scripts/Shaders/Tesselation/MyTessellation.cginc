@@ -8,6 +8,7 @@ struct TessellationControlPoint {
 	float4 vertex : INTERNALTESSPOS;
 	float3 normal : NORMAL;
 	float4 tangent : TANGENT;
+	float4 binormal : BINORMAL;
 	float2 uv : TEXCOORD0;
 	float2 uv1 : TEXCOORD1;
 	float2 uv2 : TEXCOORD2;
@@ -41,17 +42,7 @@ TessellationControlPoint MyTessellationVertexProgram (VertexData v) {
 }
 
 float TessellationEdgeFactor (float3 p0, float3 p1) {
-	#if defined(_TESSELLATION_EDGE)
-		float edgeLength = distance(p0, p1);
-
-		float3 edgeCenter = (p0 + p1) * 0.5;
-		float viewDistance = distance(edgeCenter, _WorldSpaceCameraPos);
-
-		return edgeLength * _ScreenParams.y /
-			(_TessellationEdgeLength * viewDistance);
-	#else
 		return _TessellationUniform;
-	#endif
 }
 
 TessellationFactors MyPatchConstantFunction (
@@ -104,6 +95,30 @@ InterpolatorsVertex MyDomainProgram (
 	MY_DOMAIN_PROGRAM_INTERPOLATE(uv2)
 
 	return MyVertexProgram(data);
+}
+
+
+[UNITY_domain("tri")]
+InterpolatorsVertex LEADRDomain(
+	TessellationFactors factors,
+	OutputPatch<TessellationControlPoint, 3> patch,
+	float3 barycentricCoordinates : SV_DomainLocation
+) {
+	VertexData data;
+
+#define MY_DOMAIN_PROGRAM_INTERPOLATE(fieldName) data.fieldName = \
+		patch[0].fieldName * barycentricCoordinates.x + \
+		patch[1].fieldName * barycentricCoordinates.y + \
+		patch[2].fieldName * barycentricCoordinates.z;
+
+	MY_DOMAIN_PROGRAM_INTERPOLATE(vertex)
+	MY_DOMAIN_PROGRAM_INTERPOLATE(normal)
+	MY_DOMAIN_PROGRAM_INTERPOLATE(tangent)
+	MY_DOMAIN_PROGRAM_INTERPOLATE(uv)
+	MY_DOMAIN_PROGRAM_INTERPOLATE(uv1)
+	MY_DOMAIN_PROGRAM_INTERPOLATE(uv2)
+
+	return LEADRVert(data);
 }
 
 #endif

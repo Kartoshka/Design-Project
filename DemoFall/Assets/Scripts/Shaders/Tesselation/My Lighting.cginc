@@ -23,6 +23,7 @@ float3 CreateBinormal (float3 normal, float3 tangent, float binormalSign) {
 		(binormalSign * unity_WorldTransformParams.w);
 }
 
+
 InterpolatorsVertex MyVertexProgram (VertexData v) {
 	InterpolatorsVertex i;
 	UNITY_INITIALIZE_OUTPUT(InterpolatorsVertex, i);
@@ -405,6 +406,8 @@ struct FragmentOutput {
 		float4 color : SV_Target;
 	#endif
 };
+
+
 
 FragmentOutput MyFragmentProgram (Interpolators i) {
 	UNITY_SETUP_INSTANCE_ID(i);

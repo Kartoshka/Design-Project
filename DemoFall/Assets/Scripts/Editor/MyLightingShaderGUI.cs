@@ -74,6 +74,10 @@ public class MyLightingShaderGUI : ShaderGUI {
         if (target.HasProperty("_TessellationUniform")) {
             DoTessellation();
         }
+        if (target.HasProperty("_Lean1")) {
+            DoMain();
+            //DoLEAN
+        }
         if (target.HasProperty("_WireframeColor")) {
 			DoWireframe();
 		}
