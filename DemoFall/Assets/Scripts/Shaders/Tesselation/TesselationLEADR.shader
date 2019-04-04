@@ -52,6 +52,7 @@
 					#pragma shader_feature _DETAIL_NORMAL_MAP
 
 					#pragma multi_compile _ LOD_FADE_CROSSFADE
+					#pragma multi_compile  _AUTO_LOD_OFF _AUTO_LOD_ON
 
 					#pragma multi_compile_fwdbase
 					#pragma multi_compile_fog

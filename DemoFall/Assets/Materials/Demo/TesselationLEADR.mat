@@ -6,9 +6,9 @@ Material:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: TessLEADR
+  m_Name: TesselationLEADR
   m_Shader: {fileID: 4800000, guid: 2fa7c43e9bb1b1b40b7fe657250594a4, type: 3}
-  m_ShaderKeywords: _NORMAL_MAP _PARALLAX_MAP
+  m_ShaderKeywords: _AUTO_LOD_ON _NORMAL_MAP _PARALLAX_MAP
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -75,7 +75,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
-    - _AUTO_LOD: 0
+    - _AUTO_LOD: 1
     - _BumpScale: 1
     - _Cutoff: 0.357
     - _DetailBumpScale: 1
@@ -84,12 +84,12 @@ Material:
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
-    - _LOD: 5
+    - _LOD: 0
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _ParallaxStrength: 0.138
+    - _ParallaxStrength: 0
     - _Rough: 0.5
     - _Smoothness: 0.563
     - _SmoothnessTextureChannel: 0
@@ -97,7 +97,7 @@ Material:
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _TessellationEdgeLength: 100
-    - _TessellationUniform: 64
+    - _TessellationUniform: 1
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:

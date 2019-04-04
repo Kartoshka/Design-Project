@@ -152,8 +152,8 @@ FragmentOutput LEADRFrag(Interpolators i)
 	// Unpack Lean Maps
 
 #ifdef _AUTO_LOD_OFF
-	float4 t1 = tex2Dlod(_Lean1, float4(i.uv,0, _LOD));
-	float4 t2 = tex2Dlod(_Lean2, float4(i.uv,0, _LOD));
+	float4 t1 = tex2Dlod(_Lean1, float4(i.uv.xy,0, _LOD));
+	float4 t2 = tex2Dlod(_Lean2, float4(i.uv.xy,0, _LOD));
 #else
 	float4 t1 = tex2D(_Lean1, i.uv.xy);
 	float4 t2 = tex2D(_Lean2, i.uv.xy);
