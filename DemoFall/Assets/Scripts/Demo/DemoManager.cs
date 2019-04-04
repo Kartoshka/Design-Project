@@ -10,6 +10,7 @@ public class DemoManager : MonoBehaviour {
         public Texture2D NormalMap;
         public Texture2D Lean1;
         public Texture2D Lean2;
+        public Texture2D Displacement;
 
         public Color Albedo;
     }
