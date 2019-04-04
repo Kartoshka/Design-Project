@@ -1,6 +1,6 @@
 ﻿// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
 
-Shader "Custom/Regular/LeanSpec"
+Shader "Custom/LEAN"
 {
 	Properties
 	{
@@ -9,8 +9,8 @@ Shader "Custom/Regular/LeanSpec"
         _Lean2 ("Lean 2", 2D) = "bump" {}
         _LOD("Level of Detail", Float) = 0
         _Spec("Specular Exponent", Float) = 48
-        _Correction("Correction Factor", Float) = 1
         [MaterialToggle] _AUTO_LOD("Automatic LOD", Float) = 0
+		[MaterialToggle] _BECKMANN("Toggle use of Beckmann Distribution", Float) = 0
 	}
 	SubShader
 	{
@@ -24,9 +24,10 @@ Shader "Custom/Regular/LeanSpec"
 
 			#pragma vertex vert
 			#pragma fragment frag
-            #pragma multi_compile  _AUTO_LOD_OFF _AUTO_LOD_ON
-
-            #include "UnityCG.cginc"
+            #pragma multi_compile  _AUTO_LOD_OFF _AUTO_LOD_ON 
+			#pragma multi_compile _BECKMANN_OFF _BECKMANN_ON
+            
+			#include "UnityCG.cginc"
             #include "UnityLightingCommon.cginc" // for _LightColor0
             
             inline float3 UnpackLeanNormal(float3 n){
@@ -111,7 +112,6 @@ Shader "Custom/Regular/LeanSpec"
                 viewDir = float3(dot(i.tSpace0, viewDir), dot(i.tSpace1, viewDir), dot(i.tSpace2,viewDir));
                 lightDir = float3(dot(i.tSpace0, lightDir), dot(i.tSpace1, lightDir), dot(i.tSpace2,lightDir));
                 
-                
                 half3 h = normalize (lightDir + viewDir);
                     
                 //Convert M to sigma by Equation 5
@@ -124,11 +124,17 @@ Shader "Custom/Regular/LeanSpec"
                 float e = pH.x * pH.x * covMat.y + pH.y*pH.y*covMat.x - 2*pH.x*pH.y*covMat.z;
         
                 float spec = 0;
+			#ifdef _BECKMANN_ON
                 if(det > 0)
-                    spec = exp(-0.5 * e/det)/(sqrt(det) * UNITY_TWO_PI) * _Correction /* (4 * dot(viewDir, h) * dot(normal, viewDir))*/;
+                    spec = exp(-0.5 * e/det)/(sqrt(det) * UNITY_TWO_PI);
+			#else
+				float nh = max(0, dot(normal, h));
+				float norm = _Spec / (UNITY_TWO_PI);
+				spec = pow(nh, _Spec) * norm;
+			#endif
                  
                 half4 c;
-                c.rgb = (_Albedo + _LightColor0.rgb * spec);
+                c.rgb = (_Albedo*_LightColor0.rgb* saturate(dot(lightDir, normal)) + _LightColor0.rgb * spec);
                 c.a = 1.0f;
                 
                 return c;

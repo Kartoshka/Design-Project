@@ -100,7 +100,7 @@ Shader "Custom/Regular/SimpleSpecular"
 				float norm = _Spec / (UNITY_TWO_PI);
                 
                 half4 c;
-				c.rgb = (_Albedo + _LightColor0.rgb * spec * norm);
+				c.rgb = (_Albedo*_LightColor0.rgb * saturate(dot(normal, lightDir)) + _LightColor0.rgb * spec * norm);
                 c.a = 1.0f;
                 return c;
 			}

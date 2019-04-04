@@ -8,7 +8,7 @@ Material:
   m_PrefabInternal: {fileID: 0}
   m_Name: SimpleSpec
   m_Shader: {fileID: 4800000, guid: 27ac3c063b466413d92def69311051b2, type: 3}
-  m_ShaderKeywords: 
+  m_ShaderKeywords: _AUTO_LOD_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -39,11 +39,11 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Lean1:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 9db2f1e6db03ede4fb70061f1f3f5706, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Lean2:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 8c1137115e7a31141b2788a4730c0003, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
@@ -55,7 +55,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _NormalMap:
-        m_Texture: {fileID: 2800000, guid: 7d76bd8dc6bef2b43b331b2a34d90dd6, type: 3}
+        m_Texture: {fileID: 2800000, guid: 3f22bcb96e53ee445b52ab9c893915e8, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
@@ -67,7 +67,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
-    - _AUTO_LOD: 0
+    - _AUTO_LOD: 1
     - _BumpScale: 1
     - _Correction: 1
     - _Cutoff: 0.5
@@ -76,7 +76,7 @@ Material:
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
-    - _LOD: 10
+    - _LOD: 0
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
@@ -89,6 +89,6 @@ Material:
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:
-    - _Albedo: {r: 0, g: 0, b: 0, a: 1}
+    - _Albedo: {r: 1, g: 0, b: 0, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}

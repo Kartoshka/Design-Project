@@ -1,6 +1,6 @@
 // Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
 
-Shader "Custom/Regular/LeadrSpec"
+Shader "Custom/LEADR"
 {
 	Properties
 	{
@@ -8,10 +8,8 @@ Shader "Custom/Regular/LeadrSpec"
         _Lean1 ("Lean 1", 2D) = "bump" {}
         _Lean2 ("Lean 2", 2D) = "bump" {}
         _LOD("Level of Detail", Float) = 0
-        _Spec("Specular Exponent", Float) = 48
-        _Correction("Correction Factor", Float) = 1
-        _Refractive("Refractive Index", Float) = 0
-        _Radiance ("Radiance", Float) = 1
+        _Rough("Roughness", Float) = 0
+        _Spec("Refractive Index", Range(0,1)) = 0.5
         [MaterialToggle] _AUTO_LOD("Automatic LOD", Float) = 0
 	}
 	SubShader
@@ -48,7 +46,7 @@ Shader "Custom/Regular/LeadrSpec"
                                  2 * cos(phi) * sin(phi) * covMat.z;
                 // extend to Gaussian with approximation Walter et al. (2007)
                 float v = (w.z/sin(theta) - mu)/(sqrt(sigma_sq * 2));
-                if (v > 1.6)
+                if (v < 1.6)
                     return (1 - 1.259 * v + 0.396 * v * v) / (3.535 * v + 2.181 * v * v);
                 return 0;
             }
@@ -94,9 +92,9 @@ Shader "Custom/Regular/LeadrSpec"
             float4 _Lean2_ST;
             
             float _LOD;
-            float _Spec;
+            float _Rough;
             float _Correction;
-            float _Refractive;
+            float _Spec;
             float _Radiance;
 
             
@@ -143,15 +141,14 @@ Shader "Custom/Regular/LeadrSpec"
                 float3 M =  float3( t2.zw, 2*t1.w - 1);
                 
                 //normal = fixed3(dot(i.tSpace0, normal), dot(i.tSpace1, normal), dot(i.tSpace2, normal));
-                viewDir = float3(dot(i.tSpace0, viewDir), dot(i.tSpace1, viewDir), dot(i.tSpace2,viewDir));
-                lightDir = float3(dot(i.tSpace0, lightDir), dot(i.tSpace1, lightDir), dot(i.tSpace2,lightDir));
-                
+                viewDir = normalize(float3(dot(i.tSpace0, viewDir), dot(i.tSpace1, viewDir), dot(i.tSpace2,viewDir)));
+                lightDir = normalize(float3(dot(i.tSpace0, lightDir), dot(i.tSpace1, lightDir), dot(i.tSpace2,lightDir)));
                 
                 half3 h = normalize (lightDir + viewDir);
-                    
+                
                 //Convert M to sigma by Equation 5
                 float3 covMat =  M - float3(B.x * B.x, B.y * B.y, B.x * B.y);
-				covMat.xy += 1.0f / _Spec;
+				covMat.xy += 0.5f * _Rough * _Rough;
                 float det = covMat.x * covMat.y - covMat.z * covMat.z;
                 
                 //Calculate projection of halfVector onto the z = 1 plane, and shift
@@ -160,27 +157,25 @@ Shader "Custom/Regular/LeadrSpec"
         
                 float P22 = 0;
                 if(det > 0)
-                    P22 = exp(-0.5 * e/det)/(sqrt(det) * UNITY_TWO_PI) * _Correction /* (4 * dot(viewDir, h) * dot(normal, viewDir))*/;
+                    P22 = exp(-0.5 * e/det)/(sqrt(det) * UNITY_TWO_PI);
                 
                 // Calculate normal distribution function D following anisotropic Beckmann formulation  
                 // Eq (10)
-                float D = P22/pow(dot(h, normal),4);
+                float D = P22/pow(h.z, 4);
                 
                 // Microfacet theory, micronormals average to mesonormal 
-                // Eq (11)
-                float3 mesonormal = (-B.x, -B.y, 1) / sqrt(1 + B.x * B.x + B.y * B.y);
+                // Eq (11) TODO: NEGATIVE????
+				float3 mesonormal = normalize(float3(B.x, B.y, 1));
                 
                 // Use Shlick approximation for Fresnel term
-                float F = SchlickIORFresnelFunction(_Refractive, dot(lightDir, h));
+                float F = SchlickIORFresnelFunction(_Spec, dot(lightDir, h));
 
                 // Specular surface shading formulation for LEADR
                 // Eq (17)
-                // mesonormal = normalize(mesonormal);
-                // float spec = (dot(mesonormal, normal) * _Radiance * F * D)/(4 * (1 + Lambda(viewDir, B, covMat) + Lambda(lightDir, B, covMat)));
-                float spec = (dot(mesonormal, normal) * _Radiance * F * D)/(dot(mesonormal, viewDir) * 4 * (1 + Lambda(viewDir, B, covMat) + Lambda(lightDir, B, covMat)));
+				float spec = (mesonormal.z/dot(mesonormal, viewDir))* (_LightColor0.rgb * F * D) / (4 * (1 + Lambda(viewDir, B, covMat) + Lambda(lightDir, B, covMat)));
 
                 half4 c;
-                c.rgb = (_Albedo + _LightColor0.rgb * spec);
+                c.rgb = (_Albedo * _LightColor0.rgb * saturate(dot(lightDir, normal)) + spec);
                 c.a = 1.0f;
                 
                 return c;
